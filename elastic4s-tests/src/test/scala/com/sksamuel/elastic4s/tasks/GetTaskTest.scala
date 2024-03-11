@@ -10,6 +10,7 @@ import com.sksamuel.elastic4s.testkit.DockerTests
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 
+import scala.concurrent.Await
 import scala.concurrent.duration.DurationInt
 
 class GetTaskTest extends AnyWordSpec with Matchers with DockerTests {
@@ -58,13 +59,16 @@ class GetTaskTest extends AnyWordSpec with Matchers with DockerTests {
       val start = System.currentTimeMillis()
 
       // Build an invalid query to make the update by query task fail
-      val query = (0 until 91265)
+      val query = (0 until 16000)
         .flatMap(i => Seq(TermQuery("foo", i.toString), TermQuery("moo", (i+1).toString), TermQuery("goo" ,(i+2).toString)))
 
       // kick off a task
       val resp: GetTask = client.execute {
         updateByQueryAsync("get_task_a", BoolQuery(should = query))
       }.await.result.task
+
+      // We have to wait because if we get the status too soon, the task has not been executed
+      Thread.sleep(3000)
 
       // use the task id from the above task
       val result: GetTaskResponse = client.execute {
