@@ -1,16 +1,13 @@
 package com.sksamuel.elastic4s.tasks
 
 import com.sksamuel.elastic4s.requests.common.RefreshPolicy
-import com.sksamuel.elastic4s.requests.searches.queries.QueryStringQuery
 import com.sksamuel.elastic4s.requests.searches.queries.compound.BoolQuery
 import com.sksamuel.elastic4s.requests.searches.term.TermQuery
-import com.sksamuel.elastic4s.requests.task.{GetTask, GetTaskResponse, Retries, Task}
-import com.sksamuel.elastic4s.requests.update.UpdateByQueryTask
+import com.sksamuel.elastic4s.requests.task.{GetTask, GetTaskResponse, Retries}
 import com.sksamuel.elastic4s.testkit.DockerTests
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 
-import scala.concurrent.Await
 import scala.concurrent.duration.DurationInt
 
 class GetTaskTest extends AnyWordSpec with Matchers with DockerTests {
@@ -67,13 +64,20 @@ class GetTaskTest extends AnyWordSpec with Matchers with DockerTests {
         updateByQueryAsync("get_task_a", BoolQuery(should = query))
       }.await.result.task
 
-      // We have to wait because if we get the status too soon, the task has not been executed
-      Thread.sleep(10000)
+      val before = System.currentTimeMillis()
 
-      // use the task id from the above task
-      val result: GetTaskResponse = client.execute {
-        getTask(resp.nodeId, resp.taskId)
-      }.await.result
+      // Sorry for this
+      var result: GetTaskResponse = null
+      var found = false
+
+      // Retry to get the task until it is executed
+       while (!found) {
+         // use the task id from the above task
+         result = client.execute {
+          getTask(resp.nodeId, resp.taskId)
+        }.await.result
+        found = result.error.isDefined || (System.currentTimeMillis() - before > 20000)
+      }
 
       result.task.node shouldBe resp.nodeId
       result.task.id shouldBe resp.taskId
