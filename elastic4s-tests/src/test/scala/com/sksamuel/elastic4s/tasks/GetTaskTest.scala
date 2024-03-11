@@ -56,7 +56,7 @@ class GetTaskTest extends AnyWordSpec with Matchers with DockerTests {
       val start = System.currentTimeMillis()
 
       // Build an invalid query to make the update by query task fail
-      val query = (0 until 16000)
+      val query = (0 until 200000)
         .flatMap(i => Seq(TermQuery("foo", i.toString), TermQuery("moo", (i+1).toString), TermQuery("goo" ,(i+2).toString)))
 
       // kick off a task
