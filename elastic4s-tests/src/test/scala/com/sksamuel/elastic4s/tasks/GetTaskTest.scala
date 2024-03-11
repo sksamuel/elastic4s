@@ -68,7 +68,7 @@ class GetTaskTest extends AnyWordSpec with Matchers with DockerTests {
       }.await.result.task
 
       // We have to wait because if we get the status too soon, the task has not been executed
-      Thread.sleep(3000)
+      Thread.sleep(10000)
 
       // use the task id from the above task
       val result: GetTaskResponse = client.execute {
