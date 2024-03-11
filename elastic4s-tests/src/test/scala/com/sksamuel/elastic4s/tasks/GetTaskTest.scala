@@ -78,6 +78,7 @@ class GetTaskTest extends AnyWordSpec with Matchers with DockerTests {
         }.await.result
          val elapsed = System.currentTimeMillis() - before
          println(s"Elapsed time : $elapsed ms")
+         println(result)
          found = result.error.isDefined || (elapsed > 60000)
          Thread.sleep(1000)
       }
