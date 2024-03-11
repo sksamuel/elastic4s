@@ -76,7 +76,7 @@ class GetTaskTest extends AnyWordSpec with Matchers with DockerTests {
          result = client.execute {
           getTask(resp.nodeId, resp.taskId)
         }.await.result
-        found = result.error.isDefined || (System.currentTimeMillis() - before > 20000)
+        found = result.error.isDefined || (System.currentTimeMillis() - before > 60000)
       }
 
       result.task.node shouldBe resp.nodeId
