@@ -1,5 +1,6 @@
 package com.sksamuel.elastic4s.pekko.streams
 
+import com.sksamuel.elastic4s.ElasticApi.clearScroll
 import com.sksamuel.elastic4s.ElasticDsl.searchScroll
 import com.sksamuel.elastic4s._
 import com.sksamuel.elastic4s.requests.searches._
@@ -26,6 +27,7 @@ class ElasticSource(client: ElasticClient, settings: SourceSettings)
 
   private implicit val searchHandler: Handler[SearchRequest, SearchResponse] = SearchHandlers.SearchHandler
   private implicit val scrollHandler: Handler[SearchScrollRequest, SearchResponse] = SearchScrollHandlers.SearchScrollHandler
+  private implicit val clearScrollHandler: Handler[ClearScrollRequest, ClearScrollResponse] = SearchScrollHandlers.ClearScrollHandler
   private implicit val executor: Executor[Future] = Executor.FutureExecutor
   private implicit val functor: Functor[Future] = Functor.FutureFunctor
 
@@ -85,6 +87,13 @@ class ElasticSource(client: ElasticClient, settings: SourceSettings)
       if (buffer.nonEmpty)
         push(out, buffer.dequeue)
       maybeFetch()
+    }
+
+    override def postStop(): Unit = {
+        Option(scrollId) match {
+          case Some(id) => client.execute(clearScroll(id))
+          case _ => ()
+        }
     }
 
     setHandler(out, this)
