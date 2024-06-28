@@ -1,6 +1,7 @@
 package com.sksamuel.elastic4s.handlers.searches.knn
 
 import com.sksamuel.elastic4s.handlers.searches.queries.QueryBuilderFn
+import com.sksamuel.elastic4s.handlers.searches.queries.nested.InnerHitQueryBodyBuilder
 import com.sksamuel.elastic4s.json.{XContentBuilder, XContentFactory}
 import com.sksamuel.elastic4s.requests.searches.knn.Knn
 
@@ -17,6 +18,7 @@ object KnnBuilderFn {
     }
     knn.filter.foreach(filter => builder.rawField("filter", QueryBuilderFn(filter)))
     builder.field("boost", knn.boost)
+    knn.inner.foreach(inner => builder.field("inner_hits", InnerHitQueryBodyBuilder.toJson(inner)))
     builder.endObject()
     builder
   }

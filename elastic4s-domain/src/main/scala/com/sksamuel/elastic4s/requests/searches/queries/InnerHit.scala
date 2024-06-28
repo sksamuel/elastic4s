@@ -15,7 +15,8 @@ case class InnerHit(name: String,
                     docValueFields: Seq[String] = Nil,
                     sorts: Seq[Sort] = Nil,
                     from: Option[Int] = None,
-                    highlight: Option[Highlight] = None) {
+                    highlight: Option[Highlight] = None,
+                    fields: Seq[String] = Nil) {
 
   def sortBy(sorts: Sort*): InnerHit = sortBy(sorts)
   def sortBy(sorts: Iterable[Sort]): InnerHit = copy(sorts = sorts.toSeq)
@@ -45,4 +46,7 @@ case class InnerHit(name: String,
     copy(storedFieldNames = storedFieldNames.toSeq)
 
   def explain(explain: Boolean): InnerHit = copy(explain = explain.some)
+
+  def fields(fields: Iterable[String]): InnerHit =
+    copy(fields = fields.toSeq)
 }

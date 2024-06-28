@@ -34,6 +34,9 @@ object InnerHitQueryBodyBuilder extends BodyBuilder[InnerHit] {
     if (d.storedFieldNames.nonEmpty)
       builder.array("stored_fields", d.storedFieldNames.toArray)
 
+    if (d.fields.nonEmpty)
+      builder.array("fields", d.fields.toArray)
+
     d.highlight.foreach { highlight =>
       builder.rawField("highlight", searches.HighlightBuilderFn(highlight))
     }

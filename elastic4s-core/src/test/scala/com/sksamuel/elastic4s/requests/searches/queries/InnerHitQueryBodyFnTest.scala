@@ -20,8 +20,9 @@ class InnerHitQueryBodyFnTest extends AnyFunSuite with Matchers {
       .sortBy(FieldSort("sortField"))
       .storedFieldNames(List("field1", "field2"))
       .highlighting(HighlightField("hlField"))
+      .fields(List("f1", "f2"))
 
     new XContentBuilder(InnerHitQueryBodyBuilder.toJson(q)).string shouldBe
-      """{"name":"inners","from":2,"explain":false,"track_scores":true,"version":true,"size":2,"docvalue_fields":["df1","df2"],"sort":[{"sortField":{"order":"asc"}}],"stored_fields":["field1","field2"],"highlight":{"fields":{"hlField":{}}}}"""
+      """{"name":"inners","from":2,"explain":false,"track_scores":true,"version":true,"size":2,"docvalue_fields":["df1","df2"],"sort":[{"sortField":{"order":"asc"}}],"stored_fields":["field1","field2"],"fields":["f1","f2"],"highlight":{"fields":{"hlField":{}}}}"""
   }
 }
