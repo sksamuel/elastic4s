@@ -6,7 +6,7 @@ import com.sksamuel.elastic4s.handlers.common.FetchSourceContextQueryParameterFn
 import com.sksamuel.elastic4s.handlers.script.ScriptBuilderFn
 import com.sksamuel.elastic4s.handlers.searches.queries
 import com.sksamuel.elastic4s.json.{XContentBuilder, XContentFactory}
-import com.sksamuel.elastic4s.requests.common.RefreshPolicyHttpValue
+import com.sksamuel.elastic4s.requests.common.{AutoSlices, NumericSlices, RefreshPolicyHttpValue}
 import com.sksamuel.elastic4s.requests.task.GetTask
 import com.sksamuel.elastic4s.requests.update.{BaseUpdateByQueryRequest, UpdateByQueryAsyncRequest, UpdateByQueryAsyncResponse, UpdateByQueryRequest, UpdateByQueryResponse, UpdateByQueryTask, UpdateRequest, UpdateResponse}
 import com.sksamuel.elastic4s.{BulkIndexByScrollFailure, ElasticError, ElasticRequest, ElasticUrlEncoder, Handler, HttpEntity, HttpResponse, ResponseHandler}
@@ -87,7 +87,10 @@ trait UpdateHandlers {
       request.scrollSize.foreach(params.put("scroll_size", _))
       request.waitForActiveShards.foreach(params.put("wait_for_active_shards", _))
       request.waitForCompletion.foreach(params.put("wait_for_completion", _))
-      request.slices.foreach(params.put("slices", _))
+      request.slices.foreach {
+        case AutoSlices            => params.put("slices", "auto")
+        case NumericSlices(slices) => params.put("slices", slices)
+      }
 
       val body = UpdateByQueryBodyFn(request)
       logger.debug(s"Update by query ${body.string}")

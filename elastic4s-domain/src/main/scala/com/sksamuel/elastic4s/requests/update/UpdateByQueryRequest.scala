@@ -1,7 +1,7 @@
 package com.sksamuel.elastic4s.requests.update
 
 import com.sksamuel.elastic4s.Indexes
-import com.sksamuel.elastic4s.requests.common.{RefreshPolicy, Slice}
+import com.sksamuel.elastic4s.requests.common.{ AutoSlices, NumericSlices, RefreshPolicy, Slice, Slices}
 import com.sksamuel.elastic4s.requests.script.Script
 import com.sksamuel.elastic4s.requests.searches.queries.Query
 import com.sksamuel.elastic4s.ext.OptionImplicits._
@@ -33,7 +33,7 @@ trait BaseUpdateByQueryRequest {
 
   val scrollSize: Option[Int]
 
-  val slices: Option[Int]
+  val slices: Option[Slices]
 
   val slice: Option[Slice]
 
@@ -59,7 +59,7 @@ case class UpdateByQueryRequest(indexes: Indexes,
                                 retryBackoffInitialTime: Option[FiniteDuration] = None,
                                 scroll: Option[String] = None,
                                 scrollSize: Option[Int] = None,
-                                slices: Option[Int] = None,
+                                slices: Option[Slices] = None,
                                 slice: Option[Slice] = None,
                                 timeout: Option[FiniteDuration] = None,
                                 shouldStoreResult: Option[Boolean] = None,
@@ -79,7 +79,8 @@ case class UpdateByQueryRequest(indexes: Indexes,
 
   def scrollSize(scrollSize: Int): UpdateByQueryRequest = copy(scrollSize = scrollSize.some)
   def slice(slice: Slice): UpdateByQueryRequest = copy(slice = slice.some)
-  def slices(slices: Int): UpdateByQueryRequest = copy(slices = slices.some)
+  def slices(slices: Int): UpdateByQueryRequest = copy(slices = Some(NumericSlices(slices)))
+  def slicesAuto(): UpdateByQueryRequest = copy(slices = Some(AutoSlices))
 
   def requestsPerSecond(requestsPerSecond: Float): UpdateByQueryRequest =
     copy(requestsPerSecond = requestsPerSecond.some)

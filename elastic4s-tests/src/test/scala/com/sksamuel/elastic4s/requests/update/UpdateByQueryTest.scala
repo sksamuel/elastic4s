@@ -65,6 +65,16 @@ class UpdateByQueryTest
     }.await.result.count shouldBe 3
   }
 
+  it should "support slices auto" in {
+    client.execute {
+      updateByQuery("pop", matchAllQuery()).script(script("ctx._source.foo = 'd'").lang("painless")).slicesAuto().refresh(RefreshPolicy.IMMEDIATE)
+    }.await.result.updated shouldBe 3
+
+    client.execute {
+      count("pop").query(termQuery("foo", "d"))
+    }.await.result.count shouldBe 3
+  }
+  
   it should "support RefreshPolicy.NONE" in {
     client.execute {
       updateByQuery("pop", matchAllQuery()).script(script("ctx._source.foo = 'c'").lang("painless")).refresh(RefreshPolicy.NONE)
