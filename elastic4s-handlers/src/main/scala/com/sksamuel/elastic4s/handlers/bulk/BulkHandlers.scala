@@ -11,7 +11,7 @@ trait BulkHandlers {
   implicit object BulkHandler extends Handler[BulkRequest, BulkResponse] {
 
     override def build(bulk: BulkRequest): ElasticRequest = {
-      val httpBody: String = buildBulkHttpBody(bulk)
+      val httpBody: String = BulkBuilderFn(bulk).mkString("", "\n", "\n")
       val entity = HttpEntity(httpBody, "application/x-ndjson")
       if (logger.isDebugEnabled()) {
         logger.debug("Sending bulk request")
@@ -24,13 +24,5 @@ trait BulkHandlers {
 
       ElasticRequest("POST", "/_bulk", params.toMap, entity)
     }
-  }
-
-  private[bulk] def buildBulkHttpBody(bulk: BulkRequest): String = {
-    val builder = StringBuilder.newBuilder
-    val rows: Iterator[String] = BulkBuilderFn(bulk)
-    rows.addString(builder, "", "\n", "")
-    builder.append("\n") // es seems to require a trailing new line as well
-    builder.mkString
   }
 }
